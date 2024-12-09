@@ -14,6 +14,7 @@ int main() {
     // Initialize propulsion system
     PropulsionSystem propulsion(3000.0);              // 3000 kg of fuel
     propulsion.addEngine(100000.0, 300.0, 0.5, 20.0); // Add main engine
+    propulsion.updateThrustDirection(Vec3(1, 1, 0).normalize());  // Point thrust up
 
     // Set initial state (100m above Earth's surface)
     State initialState(Vec3(Constants::EARTH_RADIUS + 100.0, 0, 0), // Position
@@ -33,7 +34,7 @@ int main() {
     std::ofstream dataFile("flight_data.csv");
     dataFile << std::fixed << std::setprecision(6);
     dataFile
-        << "Time,Altitude,Velocity_X,Velocity_Y,Velocity_Z,Velocity_Magnitude,"
+        << "Time,Altitude,Horizontal_Displacement,Velocity_X,Velocity_Y,Velocity_Z,Velocity_Magnitude,"
         << "Acceleration_X,Acceleration_Y,Acceleration_Z,Acceleration_"
            "Magnitude,"
         << "Mass,Fuel_Ratio,Air_Density,Air_Pressure,Temperature,"
@@ -45,7 +46,8 @@ int main() {
       const State &state = sim.getState();
 
       // Calculate current conditions
-      double altitude = state.position.magnitude() - Constants::EARTH_RADIUS;
+      double altitude = state.position.x() - Constants::EARTH_RADIUS;
+      double horizontal_displacement = state.position.y();
       double velocity_mag = state.velocity.magnitude();
       double accel_mag = state.acceleration.magnitude();
       double air_density = Atmosphere::getDensity(altitude);
@@ -59,7 +61,7 @@ int main() {
 
       // Log data every second
       if (std::fmod(sim.getTime(), 1.0) < 0.01) {
-        dataFile << sim.getTime() << "," << altitude << ","
+        dataFile << sim.getTime() << "," << altitude << "," << horizontal_displacement << ","
                  << state.velocity.x() << "," << state.velocity.y() << ","
                  << state.velocity.z() << "," << velocity_mag << ","
                  << state.acceleration.x() << "," << state.acceleration.y()

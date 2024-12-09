@@ -95,7 +95,7 @@ class EnhancedRocketVisualizer:
         
         self.ax_main.set_xlim(-ground_width/2, ground_width/2)
         self.ax_main.set_ylim(ground_y, self.max_altitude * 1.2)
-        
+
         # Grid
         self.ax_main.grid(True, color='#1E90FF', alpha=0.1, linestyle='--', linewidth=0.5)
         
@@ -136,8 +136,7 @@ class EnhancedRocketVisualizer:
             ('MASS', 'kg', '{:,.0f}'),
             ('AIR DENSITY', 'kg/m³', '{:.3f}'),
             ('TEMPERATURE', 'K', '{:.1f}'),
-            ('MACH', '', '{:.2f}'),
-            ('FUEL MASS RATIO', '', '{:.2f}')
+            ('MACH', '', '{:.2f}')
         ]
         
         for i, (param, unit, _) in enumerate(params):
@@ -271,9 +270,8 @@ class EnhancedRocketVisualizer:
             ]
         )
 
-
         flames = []
-        offset = 175
+        offset = 350
         # Engine flame
         if abs(velocity) > 0:
             flame_colors = ['#FF4500', '#FF8C00', '#FFD700']
@@ -305,11 +303,11 @@ class EnhancedRocketVisualizer:
         self.setup_main_view()
         
         # Draw rocket
-        rocket, flames = self.draw_rocket(0, current_data['Altitude'], current_data['Velocity_X'])
+        rocket, flames = self.draw_rocket(current_data['Horizontal_Displacement'], current_data['Altitude'], current_data['Velocity_X'])
         self.ax_main.add_patch(rocket)
         for flame in flames:
             self.ax_main.add_patch(flame) 
-        
+
         # Update trajectory plot
         plot_data = self.data.iloc[:frame+1]
         self.trajectory_line.set_data(plot_data['Time'], plot_data['Altitude']/1000)
@@ -323,15 +321,12 @@ class EnhancedRocketVisualizer:
             'MASS': current_data['Mass'],
             'AIR DENSITY': current_data['Air_Density'],
             'TEMPERATURE': current_data['Temperature'],
-            'MACH': current_data['Mach_Number'],
-            'FUEL MASS RATIO' : current_data['Fuel_Ratio']
+            'MACH': current_data['Mach_Number']
         }
         
         for param, text_obj in self.telemetry_texts.items():
             if param == 'ALTITUDE':
                 formatted_value = f"{value_map[param]:,.1f}"
-            elif param == 'FUEL MASS RATIO':
-                formatted_value = f"{value_map[param]:,.2f}" # Assuming 2 decimal precision to be displayed
             else:
                 formatted_value = f"{value_map[param]:.1f}"
             text_obj.set_text(formatted_value)
